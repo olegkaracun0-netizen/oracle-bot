@@ -4,6 +4,22 @@ const TOKEN = process.env.TOKEN || process.env.BOT_TOKEN || process.env.TELEGRAM
 const bot = new Telegraf(TOKEN);
 
 // ══════════════════════════════════════
+//  СТАТИСТИКА ПОЛЬЗОВАТЕЛЕЙ
+// ══════════════════════════════════════
+
+var stats = {};
+
+function addStat(userId, type) {
+  if (!stats[userId]) {
+    stats[userId] = { total: 0, predict: 0, love: 0, work: 0, health: 0, card: 0, horoscope: 0, random: 0 };
+  }
+  stats[userId].total++;
+  if (stats[userId][type] !== undefined) {
+    stats[userId][type]++;
+  }
+}
+
+// ══════════════════════════════════════
 //  ПРЕДСКАЗАНИЯ
 // ══════════════════════════════════════
 
@@ -48,6 +64,16 @@ const fortunes = [
   "Сегодня тебе повезёт с числом 7. Или с числом 42. Или с каким-то другим числом.",
   "Твои мечты становятся реальностью. Медленно, но становятся. Очень медленно.",
   "Сегодня звёзды благоприятствуют новым начинаниям. Например, наконец убраться в комнате.",
+  "Сегодня хороший день чтобы позвонить тому, кому давно не звонил. Он уже забыл твой голос.",
+  "Планеты говорят: не торопись. Ты и так никуда не торопишься. Планеты довольны.",
+  "Сегодня ты найдёшь решение старой проблемы. Оно было очевидным с самого начала.",
+  "Звёзды обещают сюрприз после обеда. Возможно, это будет икота.",
+  "Сегодня твоя улыбка заразительна. Используй её с умом и только в мирных целях.",
+  "Луна в твоём знаке усиливает интуицию. Ты уже знаешь, что съешь на ужин.",
+  "Сегодня хороший день для новых знакомств. Хотя бы познакомься с соседом наконец.",
+  "Вселенная заготовила для тебя подарок. Он где-то рядом. Ищи внимательнее.",
+  "Сегодня твои слова имеют особую силу. Используй это для заказа пиццы.",
+  "Звёзды говорят: ты молодец. Просто так. Без повода. Ты заслужил.",
 ];
 
 const lovefortunes = [
@@ -92,22 +118,22 @@ const healthFortunes = [
 // ══════════════════════════════════════
 
 const horoscopes = {
-  'овен': { emoji: '♈', text: 'Овен: Марс даёт тебе энергию. Используй её не для ссор, а для уборки. Планеты одобрят.' },
-  'телец': { emoji: '♉', text: 'Телец: Венера благосклонна. Сегодня хороший день для вкусной еды. Впрочем, как и любой другой.' },
-  'близнецы': { emoji: '♊', text: 'Близнецы: Меркурий активен — ты будешь болтать больше обычного. Коллеги предупреждены.' },
-  'рак': { emoji: '♋', text: 'Рак: Луна в твоём знаке. Эмоции зашкаливают. Не плачь над рекламой — или плачь, мы не осуждаем.' },
-  'лев': { emoji: '♌', text: 'Лев: Солнце светит именно для тебя. Ты это знаешь. Все это знают. Солнце тоже знает.' },
-  'дева': { emoji: '♍', text: 'Дева: Меркурий требует порядка. Ты и так всё разложил по полочкам. Включая людей вокруг.' },
-  'весы': { emoji: '♎', text: 'Весы: Венера зовёт к гармонии. Ты пытаешься угодить всем. Спойлер: не получится. Но попытка зачтётся.' },
-  'скорпион': { emoji: '♏', text: 'Скорпион: Плутон намекает на тайны. Ты и так всё знаешь про всех. Делай вид, что не знаешь.' },
-  'стрелец': { emoji: '♐', text: 'Стрелец: Юпитер зовёт в путешествие. Хотя бы до магазина. Это тоже путешествие.' },
-  'козерог': { emoji: '♑', text: 'Козерог: Сатурн требует дисциплины. Ты и так работаешь больше всех. Сатурн доволен. Ты — нет.' },
-  'водолей': { emoji: '♒', text: 'Водолей: Уран шепчет о переменах. Ты мечтаешь изменить мир. Начни с зарядки телефона.' },
-  'рыбы': { emoji: '♓', text: 'Рыбы: Нептун зовёт в мечты. Ты уже там. Вернись — там чайник кипит.' },
+  'овен': { emoji: '♈', text: 'Марс даёт тебе энергию. Используй её не для ссор, а для уборки. Планеты одобрят.' },
+  'телец': { emoji: '♉', text: 'Венера благосклонна. Сегодня хороший день для вкусной еды. Впрочем, как и любой другой.' },
+  'близнецы': { emoji: '♊', text: 'Меркурий активен — ты будешь болтать больше обычного. Коллеги предупреждены.' },
+  'рак': { emoji: '♋', text: 'Луна в твоём знаке. Эмоции зашкаливают. Не плачь над рекламой — или плачь, мы не осуждаем.' },
+  'лев': { emoji: '♌', text: 'Солнце светит именно для тебя. Ты это знаешь. Все это знают. Солнце тоже знает.' },
+  'дева': { emoji: '♍', text: 'Меркурий требует порядка. Ты и так всё разложил по полочкам. Включая людей вокруг.' },
+  'весы': { emoji: '♎', text: 'Венера зовёт к гармонии. Ты пытаешься угодить всем. Спойлер: не получится. Но попытка зачтётся.' },
+  'скорпион': { emoji: '♏', text: 'Плутон намекает на тайны. Ты и так всё знаешь про всех. Делай вид, что не знаешь.' },
+  'стрелец': { emoji: '♐', text: 'Юпитер зовёт в путешествие. Хотя бы до магазина. Это тоже путешествие.' },
+  'козерог': { emoji: '♑', text: 'Сатурн требует дисциплины. Ты и так работаешь больше всех. Сатурн доволен. Ты — нет.' },
+  'водолей': { emoji: '♒', text: 'Уран шепчет о переменах. Ты мечтаешь изменить мир. Начни с зарядки телефона.' },
+  'рыбы': { emoji: '♓', text: 'Нептун зовёт в мечты. Ты уже там. Вернись — там чайник кипит.' },
 };
 
 // ══════════════════════════════════════
-//  КАРТА ДНЯ
+//  КАРТА ДНЯ (ТАРО)
 // ══════════════════════════════════════
 
 const cards = [
@@ -136,6 +162,66 @@ const cards = [
 ];
 
 // ══════════════════════════════════════
+//  ВИКТОРИНА
+// ══════════════════════════════════════
+
+const quizQuestions = [
+  {
+    question: 'Сколько планет в Солнечной системе?',
+    options: ['7', '8', '9', '12'],
+    correct: 1,
+    explanation: 'В 2006 году Плутон разжаловали из планет. Он до сих пор обижен.'
+  },
+  {
+    question: 'Какая планета самая большая?',
+    options: ['Сатурн', 'Уран', 'Юпитер', 'Нептун'],
+    correct: 2,
+    explanation: 'Юпитер! В него поместилось бы 1300 Земель. Он явно переедает.'
+  },
+  {
+    question: 'Что означает ретроградный Меркурий?',
+    options: ['Планета летит назад', 'Планета кажется движущейся назад', 'Меркурий злится', 'Астрологи придумали'],
+    correct: 1,
+    explanation: 'Это оптическая иллюзия из-за разных скоростей орбит. Но астрологи всё равно волнуются.'
+  },
+  {
+    question: 'Какой знак зодиака идёт первым?',
+    options: ['Телец', 'Рыбы', 'Овен', 'Козерог'],
+    correct: 2,
+    explanation: 'Овен! Начинается 21 марта. Очень нетерпеливый знак — первым хочет быть везде.'
+  },
+  {
+    question: 'Сколько карт в колоде Таро?',
+    options: ['52', '72', '78', '82'],
+    correct: 2,
+    explanation: '78 карт: 22 старших аркана и 56 младших. Всё это для того, чтобы сказать "всё будет хорошо".'
+  },
+];
+
+var userQuizState = {};
+
+// ══════════════════════════════════════
+//  МАГИЧЕСКИЙ ШАР (ДА/НЕТ)
+// ══════════════════════════════════════
+
+const magicBallAnswers = [
+  '✅ Определённо да!',
+  '✅ Бесспорно!',
+  '✅ Без сомнений!',
+  '✅ Да, и звёзды подтверждают.',
+  '✅ Скорее всего да.',
+  '🤔 Пока неясно, спроси позже.',
+  '🤔 Сосредоточься и спроси снова.',
+  '🤔 Трудно сказать сейчас.',
+  '🤔 Звёзды молчат. Подожди.',
+  '❌ Не рассчитывай на это.',
+  '❌ Мой ответ — нет.',
+  '❌ Перспективы не очень.',
+  '❌ Очень сомнительно.',
+  '❌ Нет. Категорически нет.',
+];
+
+// ══════════════════════════════════════
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ══════════════════════════════════════
 
@@ -151,145 +237,300 @@ function getCard() {
   return getRandom(cards);
 }
 
+function getLuckyNumber() {
+  return Math.floor(Math.random() * 99) + 1;
+}
+
+function getLuckyColor() {
+  var colors = ['🔴 Красный', '🟠 Оранжевый', '🟡 Жёлтый', '🟢 Зелёный', '🔵 Синий', '🟣 Фиолетовый', '⚫ Чёрный', '⚪ Белый', '🟤 Коричневый'];
+  return getRandom(colors);
+}
+
+function getMood() {
+  var moods = [
+    '😴 Сонный — звёзды советуют кофе',
+    '🔥 Энергичный — Марс доволен',
+    '😌 Спокойный — Венера улыбается',
+    '🤔 Задумчивый — Меркурий думает вместе с тобой',
+    '😄 Радостный — Юпитер в ударе',
+    '😤 Решительный — Сатурн аплодирует',
+    '🌙 Мечтательный — Нептун зовёт в грёзы',
+  ];
+  return getRandom(moods);
+}
+
 // ══════════════════════════════════════
-//  КЛАВИАТУРА
+//  КЛАВИАТУРЫ
 // ══════════════════════════════════════
 
-const keyboard = Markup.keyboard([
-  ['🔮 Предсказание дня', '💘 Про любовь'],
-  ['💼 Про работу', '🌿 Про здоровье'],
-  ['🃏 Карта дня', '♈ Гороскоп'],
-  ['🎲 Случайное', '❓ Помощь'],
+const mainKeyboard = Markup.keyboard([
+  ['🔮 Предсказание', '🃏 Карта дня'],
+  ['♈ Гороскоп', '🎱 Магический шар'],
+  ['💘 Любовь', '💼 Работа'],
+  ['🌿 Здоровье', '🍀 Удача дня'],
+  ['🎲 Случайное', '📊 Моя статистика'],
+  ['🧩 Викторина', '❓ Помощь'],
 ]).resize();
 
 // ══════════════════════════════════════
-//  КОМАНДЫ
+//  КОМАНДЫ И ОБРАБОТЧИКИ
 // ══════════════════════════════════════
 
 bot.start(function(ctx) {
   var name = ctx.from.first_name || 'смертный';
+  addStat(ctx.from.id, 'total');
   ctx.reply(
-    '🔮 Приветствую, ' + name + '!\n\nЯ — Великий Оракул Карнавалий.\nОткрою тебе тайны дня... или просто посмеюсь над твоей участью.\n\nВыбери, о чём хочешь узнать 👇',
-    keyboard
+    '🔮 Приветствую, ' + name + '!\n\n' +
+    'Я — Великий Оракул Карнавалий.\n' +
+    'Открою тебе тайны дня... или просто посмеюсь над твоей участью.\n\n' +
+    '🔮 Предсказания • 🃏 Карты Таро\n' +
+    '♈ Гороскоп • 🎱 Магический шар\n' +
+    '🍀 Удача дня • 🧩 Викторина\n\n' +
+    'Выбери что тебя интересует 👇',
+    mainKeyboard
   );
 });
 
 bot.help(function(ctx) {
   ctx.reply(
-    '📜 Команды Оракула:\n\n' +
-    '/start — начать заново\n' +
+    '📜 Все команды Оракула:\n\n' +
     '/predict — предсказание дня\n' +
+    '/card — карта Таро\n' +
+    '/horoscope — гороскоп\n' +
+    '/ball — магический шар\n' +
+    '/lucky — удача дня\n' +
     '/love — про любовь\n' +
     '/work — про работу\n' +
     '/health — про здоровье\n' +
-    '/card — карта дня\n' +
-    '/horoscope — гороскоп по знаку\n' +
-    '/random — случайное предсказание\n\n' +
-    'Или просто напиши что угодно 🔮',
-    keyboard
+    '/quiz — викторина\n' +
+    '/stats — моя статистика\n' +
+    '/random — случайное\n\n' +
+    'Или просто напиши любой вопрос — Оракул ответит! 🔮',
+    mainKeyboard
   );
 });
 
+// Предсказание
 bot.command('predict', function(ctx) {
-  ctx.reply('🔮 Великий Оракул вещает:\n\n' + getFortune(), keyboard);
+  addStat(ctx.from.id, 'predict');
+  ctx.reply('🔮 Великий Оракул вещает:\n\n' + getFortune(), mainKeyboard);
 });
 
-bot.command('love', function(ctx) {
-  ctx.reply('💘 О, сердечные дела!\n\n' + getRandom(lovefortunes) + '\n\n' + getFortune(), keyboard);
-});
-
-bot.command('work', function(ctx) {
-  ctx.reply('💼 Вижу твои финансовые тревоги!\n\n' + getRandom(workFortunes) + '\n\n' + getFortune(), keyboard);
-});
-
-bot.command('health', function(ctx) {
-  ctx.reply('🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(), keyboard);
-});
-
+// Карта дня
 bot.command('card', function(ctx) {
+  addStat(ctx.from.id, 'card');
   var card = getCard();
-  ctx.reply(
-    '🃏 Твоя карта дня:\n\n' +
+  ctx.replyWithMarkdown(
+    '🃏 *Твоя карта дня:*\n\n' +
     card.emoji + ' *' + card.name + '*\n\n' +
     card.meaning + '\n\n' +
     '_Звёзды выбрали именно эту карту. Случайно. Но многозначительно._',
-    { parse_mode: 'Markdown', ...keyboard }
+    mainKeyboard
   );
 });
 
+// Гороскоп
 bot.command('horoscope', function(ctx) {
+  addStat(ctx.from.id, 'horoscope');
   ctx.reply(
     '♈ Напиши свой знак зодиака:\n\n' +
     'Овен · Телец · Близнецы · Рак\n' +
     'Лев · Дева · Весы · Скорпион\n' +
     'Стрелец · Козерог · Водолей · Рыбы',
-    keyboard
+    mainKeyboard
   );
 });
 
+// Магический шар
+bot.command('ball', function(ctx) {
+  var question = ctx.message.text.replace('/ball', '').trim();
+  if (!question) {
+    return ctx.reply('🎱 Задай вопрос магическому шару!\n\nНапример: /ball Будет ли у меня хороший день?', mainKeyboard);
+  }
+  ctx.reply('🎱 Магический шар отвечает:\n\n' + getRandom(magicBallAnswers), mainKeyboard);
+});
+
+// Удача дня
+bot.command('lucky', function(ctx) {
+  ctx.reply(
+    '🍀 *Твоя удача на сегодня:*\n\n' +
+    '🔢 Счастливое число: *' + getLuckyNumber() + '*\n' +
+    '🎨 Счастливый цвет: *' + getLuckyColor() + '*\n' +
+    '😊 Настроение дня: *' + getMood() + '*\n\n' +
+    '✨ ' + getFortune(),
+    { parse_mode: 'Markdown', ...mainKeyboard }
+  );
+});
+
+// Любовь
+bot.command('love', function(ctx) {
+  addStat(ctx.from.id, 'love');
+  ctx.reply('💘 О, сердечные дела!\n\n' + getRandom(lovefortunes) + '\n\n' + getFortune(), mainKeyboard);
+});
+
+// Работа
+bot.command('work', function(ctx) {
+  addStat(ctx.from.id, 'work');
+  ctx.reply('💼 Вижу твои финансовые тревоги!\n\n' + getRandom(workFortunes) + '\n\n' + getFortune(), mainKeyboard);
+});
+
+// Здоровье
+bot.command('health', function(ctx) {
+  addStat(ctx.from.id, 'health');
+  ctx.reply('🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(), mainKeyboard);
+});
+
+// Случайное
 bot.command('random', function(ctx) {
+  addStat(ctx.from.id, 'random');
   var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
-  ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), keyboard);
+  ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), mainKeyboard);
+});
+
+// Статистика
+bot.command('stats', function(ctx) {
+  var s = stats[ctx.from.id];
+  if (!s || s.total === 0) {
+    return ctx.reply('📊 Ты ещё ничего не спрашивал у Оракула!\n\nНачни с /predict 🔮', mainKeyboard);
+  }
+  ctx.reply(
+    '📊 Твоя статистика:\n\n' +
+    '🔮 Предсказаний: ' + (s.predict || 0) + '\n' +
+    '🃏 Карт Таро: ' + (s.card || 0) + '\n' +
+    '♈ Гороскопов: ' + (s.horoscope || 0) + '\n' +
+    '💘 Про любовь: ' + (s.love || 0) + '\n' +
+    '💼 Про работу: ' + (s.work || 0) + '\n' +
+    '🌿 Про здоровье: ' + (s.health || 0) + '\n' +
+    '🎲 Случайных: ' + (s.random || 0) + '\n\n' +
+    '📈 Всего запросов: ' + s.total + '\n\n' +
+    '_Оракул помнит всё_ 👁️',
+    { parse_mode: 'Markdown', ...mainKeyboard }
+  );
+});
+
+// Викторина
+bot.command('quiz', function(ctx) {
+  var q = getRandom(quizQuestions);
+  userQuizState[ctx.from.id] = q;
+  var opts = q.options.map(function(o, i) { return (i + 1) + '. ' + o; }).join('\n');
+  ctx.reply(
+    '🧩 Вопрос от Оракула:\n\n' +
+    q.question + '\n\n' +
+    opts + '\n\n' +
+    'Ответь цифрой от 1 до ' + q.options.length,
+    mainKeyboard
+  );
 });
 
 // ══════════════════════════════════════
 //  КНОПКИ КЛАВИАТУРЫ
 // ══════════════════════════════════════
 
-bot.hears('🔮 Предсказание дня', function(ctx) {
-  ctx.reply('🔮 Великий Оракул вещает:\n\n' + getFortune(), keyboard);
-});
-
-bot.hears('💘 Про любовь', function(ctx) {
-  ctx.reply('💘 О, сердечные дела!\n\n' + getRandom(lovefortunes) + '\n\n' + getFortune(), keyboard);
-});
-
-bot.hears('💼 Про работу', function(ctx) {
-  ctx.reply('💼 Вижу твои финансовые тревоги!\n\n' + getRandom(workFortunes) + '\n\n' + getFortune(), keyboard);
-});
-
-bot.hears('🌿 Про здоровье', function(ctx) {
-  ctx.reply('🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(), keyboard);
+bot.hears('🔮 Предсказание', function(ctx) {
+  addStat(ctx.from.id, 'predict');
+  ctx.reply('🔮 Великий Оракул вещает:\n\n' + getFortune(), mainKeyboard);
 });
 
 bot.hears('🃏 Карта дня', function(ctx) {
+  addStat(ctx.from.id, 'card');
   var card = getCard();
-  ctx.reply(
-    '🃏 Твоя карта дня:\n\n' +
+  ctx.replyWithMarkdown(
+    '🃏 *Твоя карта дня:*\n\n' +
     card.emoji + ' *' + card.name + '*\n\n' +
     card.meaning + '\n\n' +
     '_Звёзды выбрали именно эту карту. Случайно. Но многозначительно._',
-    { parse_mode: 'Markdown', ...keyboard }
+    mainKeyboard
   );
 });
 
 bot.hears('♈ Гороскоп', function(ctx) {
   ctx.reply(
-    '♈ Напиши свой знак зодиака:\n\n' +
-    'Овен · Телец · Близнецы · Рак\n' +
-    'Лев · Дева · Весы · Скорпион\n' +
-    'Стрелец · Козерог · Водолей · Рыбы',
-    keyboard
+    '♈ Напиши свой знак зодиака:\n\nОвен · Телец · Близнецы · Рак\nЛев · Дева · Весы · Скорпион\nСтрелец · Козерог · Водолей · Рыбы',
+    mainKeyboard
+  );
+});
+
+bot.hears('🎱 Магический шар', function(ctx) {
+  ctx.reply('🎱 Задай вопрос магическому шару!\n\nНапример: будет ли у меня хороший день?\n\nПросто напиши свой вопрос 👇', mainKeyboard);
+});
+
+bot.hears('💘 Любовь', function(ctx) {
+  addStat(ctx.from.id, 'love');
+  ctx.reply('💘 О, сердечные дела!\n\n' + getRandom(lovefortunes) + '\n\n' + getFortune(), mainKeyboard);
+});
+
+bot.hears('💼 Работа', function(ctx) {
+  addStat(ctx.from.id, 'work');
+  ctx.reply('💼 Вижу твои финансовые тревоги!\n\n' + getRandom(workFortunes) + '\n\n' + getFortune(), mainKeyboard);
+});
+
+bot.hears('🌿 Здоровье', function(ctx) {
+  addStat(ctx.from.id, 'health');
+  ctx.reply('🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(), mainKeyboard);
+});
+
+bot.hears('🍀 Удача дня', function(ctx) {
+  ctx.replyWithMarkdown(
+    '🍀 *Твоя удача на сегодня:*\n\n' +
+    '🔢 Счастливое число: *' + getLuckyNumber() + '*\n' +
+    '🎨 Счастливый цвет: *' + getLuckyColor() + '*\n' +
+    '😊 Настроение дня: *' + getMood() + '*\n\n' +
+    '✨ ' + getFortune(),
+    mainKeyboard
   );
 });
 
 bot.hears('🎲 Случайное', function(ctx) {
+  addStat(ctx.from.id, 'random');
   var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
-  ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), keyboard);
+  ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), mainKeyboard);
+});
+
+bot.hears('📊 Моя статистика', function(ctx) {
+  var s = stats[ctx.from.id];
+  if (!s || s.total === 0) {
+    return ctx.reply('📊 Ты ещё ничего не спрашивал у Оракула!\n\nНачни с кнопки 🔮 Предсказание', mainKeyboard);
+  }
+  ctx.reply(
+    '📊 Твоя статистика:\n\n' +
+    '🔮 Предсказаний: ' + (s.predict || 0) + '\n' +
+    '🃏 Карт Таро: ' + (s.card || 0) + '\n' +
+    '♈ Гороскопов: ' + (s.horoscope || 0) + '\n' +
+    '💘 Про любовь: ' + (s.love || 0) + '\n' +
+    '💼 Про работу: ' + (s.work || 0) + '\n' +
+    '🌿 Про здоровье: ' + (s.health || 0) + '\n' +
+    '🎲 Случайных: ' + (s.random || 0) + '\n\n' +
+    '📈 Всего запросов: ' + s.total,
+    mainKeyboard
+  );
+});
+
+bot.hears('🧩 Викторина', function(ctx) {
+  var q = getRandom(quizQuestions);
+  userQuizState[ctx.from.id] = q;
+  var opts = q.options.map(function(o, i) { return (i + 1) + '. ' + o; }).join('\n');
+  ctx.reply(
+    '🧩 Вопрос от Оракула:\n\n' +
+    q.question + '\n\n' + opts + '\n\nОтветь цифрой от 1 до ' + q.options.length,
+    mainKeyboard
+  );
 });
 
 bot.hears('❓ Помощь', function(ctx) {
   ctx.reply(
-    '📜 Команды:\n\n' +
-    '/start — начать заново\n' +
-    '/predict — предсказание\n' +
-    '/love — про любовь\n' +
-    '/work — про работу\n' +
-    '/health — про здоровье\n' +
-    '/card — карта дня\n' +
-    '/horoscope — гороскоп\n' +
-    '/random — случайное',
-    keyboard
+    '📜 Все функции Оракула:\n\n' +
+    '🔮 Предсказание — случайное предсказание\n' +
+    '🃏 Карта дня — карта Таро\n' +
+    '♈ Гороскоп — напиши свой знак\n' +
+    '🎱 Магический шар — задай вопрос\n' +
+    '💘 Любовь — про сердечные дела\n' +
+    '💼 Работа — про карьеру и деньги\n' +
+    '🌿 Здоровье — про самочувствие\n' +
+    '🍀 Удача дня — число, цвет, настроение\n' +
+    '🎲 Случайное — сюрприз!\n' +
+    '📊 Статистика — сколько раз спрашивал\n' +
+    '🧩 Викторина — проверь знания',
+    mainKeyboard
   );
 });
 
@@ -301,47 +542,60 @@ bot.on('text', function(ctx) {
   var text = ctx.message.text;
   var lower = text.toLowerCase().trim();
 
-  // Проверяем знак зодиака
-  if (horoscopes[lower]) {
-    var h = horoscopes[lower];
-    return ctx.reply(
-      h.emoji + ' ' + h.text + '\n\n✨ ' + getFortune(),
-      keyboard
-    );
+  // Ответ на викторину (цифра)
+  if (userQuizState[ctx.from.id] && /^[1-4]$/.test(lower)) {
+    var q = userQuizState[ctx.from.id];
+    var answer = parseInt(lower) - 1;
+    delete userQuizState[ctx.from.id];
+    if (answer === q.correct) {
+      return ctx.reply('✅ Правильно! Оракул впечатлён!\n\n' + q.explanation + '\n\n🎲 Ещё вопрос? Нажми 🧩 Викторина', mainKeyboard);
+    } else {
+      return ctx.reply('❌ Неверно! Правильный ответ: ' + (q.correct + 1) + '. ' + q.options[q.correct] + '\n\n' + q.explanation + '\n\n🎲 Попробуй ещё раз!', mainKeyboard);
+    }
   }
 
-  // Умные ответы
-  if (lower.indexOf('привет') !== -1 || lower.indexOf('hello') !== -1 || lower.indexOf('хай') !== -1) {
-    return ctx.reply('✨ Приветствую! Звёзды уже смеются, предвкушая твой день.\n\n' + getFortune(), keyboard);
+  // Гороскоп по знаку
+  if (horoscopes[lower]) {
+    addStat(ctx.from.id, 'horoscope');
+    var h = horoscopes[lower];
+    return ctx.reply(h.emoji + ' ' + lower.charAt(0).toUpperCase() + lower.slice(1) + ': ' + h.text + '\n\n✨ ' + getFortune(), mainKeyboard);
+  }
+
+  // Магический шар — вопросительное предложение
+  if (lower.indexOf('?') !== -1 || lower.indexOf('ли ') !== -1 || lower.indexOf('буду') !== -1 || lower.indexOf('будет') !== -1 || lower.indexOf('получится') !== -1) {
+    return ctx.reply('🎱 Магический шар отвечает:\n\n' + getRandom(magicBallAnswers), mainKeyboard);
+  }
+
+  // Приветствие
+  if (lower.indexOf('привет') !== -1 || lower.indexOf('hello') !== -1 || lower.indexOf('хай') !== -1 || lower.indexOf('здравствуй') !== -1) {
+    var name = ctx.from.first_name || 'смертный';
+    return ctx.reply('✨ Приветствую, ' + name + '! Звёзды уже смеются, предвкушая твой день.\n\n' + getFortune(), mainKeyboard);
   }
 
   if (lower.indexOf('спасибо') !== -1 || lower.indexOf('благодарю') !== -1) {
-    return ctx.reply('🙏 Не благодари — благодари звёзды!\nХотя они заняты и, возможно, не заметят.', keyboard);
+    return ctx.reply('🙏 Не благодари — благодари звёзды!\nХотя они заняты и, возможно, не заметят.', mainKeyboard);
   }
 
-  if (lower.indexOf('скучно') !== -1 || lower.indexOf('грустно') !== -1) {
-    return ctx.reply('😏 Скуке приходит конец!\n\n' + getFortune() + '\n\nВселенная рекомендует: поговори с кактусом — он выслушает.', keyboard);
+  if (lower.indexOf('скучно') !== -1 || lower.indexOf('грустно') !== -1 || lower.indexOf('плохо') !== -1) {
+    return ctx.reply('😏 Звёзды видят твою грусть!\n\n' + getFortune() + '\n\nВселенная рекомендует: поговори с кактусом — он выслушает.', mainKeyboard);
   }
 
   if (lower.indexOf('карта') !== -1 || lower.indexOf('таро') !== -1) {
     var card = getCard();
-    return ctx.reply(
-      '🃏 Твоя карта дня:\n\n' +
-      card.emoji + ' *' + card.name + '*\n\n' +
-      card.meaning,
-      { parse_mode: 'Markdown', ...keyboard }
-    );
+    return ctx.replyWithMarkdown('🃏 *Твоя карта:*\n\n' + card.emoji + ' *' + card.name + '*\n\n' + card.meaning, mainKeyboard);
   }
 
-  if (lower.indexOf('гороскоп') !== -1 || lower.indexOf('знак') !== -1 || lower.indexOf('зодиак') !== -1) {
-    return ctx.reply(
-      '♈ Напиши свой знак зодиака:\n\nОвен · Телец · Близнецы · Рак\nЛев · Дева · Весы · Скорпион\nСтрелец · Козерог · Водолей · Рыбы',
-      keyboard
-    );
+  if (lower.indexOf('гороскоп') !== -1 || lower.indexOf('знак') !== -1) {
+    return ctx.reply('♈ Напиши свой знак зодиака:\n\nОвен · Телец · Близнецы · Рак\nЛев · Дева · Весы · Скорпион\nСтрелец · Козерог · Водолей · Рыбы', mainKeyboard);
   }
 
-  // На всё остальное — предсказание
-  ctx.reply('🔮 Оракул слышит тебя...\n\n' + getFortune(), keyboard);
+  if (lower.indexOf('удача') !== -1 || lower.indexOf('число') !== -1) {
+    return ctx.replyWithMarkdown('🍀 *Удача дня:*\n\n🔢 Число: *' + getLuckyNumber() + '*\n🎨 Цвет: *' + getLuckyColor() + '*\n\n' + getFortune(), mainKeyboard);
+  }
+
+  // По умолчанию — предсказание
+  addStat(ctx.from.id, 'predict');
+  ctx.reply('🔮 Оракул слышит тебя...\n\n' + getFortune(), mainKeyboard);
 });
 
 // ══════════════════════════════════════
@@ -355,8 +609,11 @@ bot.on('polling_error', function(error) {
 bot.launch();
 
 console.log('');
-console.log('🔮 Оракул Карнавалий запущен!');
-console.log('   Новые функции: гороскоп, карта дня, 40+ предсказаний');
+console.log('🔮 ══════════════════════════════════');
+console.log('   Оракул Карнавалий МЕГАВЕРСИЯ!');
+console.log('   Предсказания · Таро · Гороскоп');
+console.log('   Магический шар · Викторина · Удача');
+console.log('🔮 ══════════════════════════════════');
 console.log('');
 
 process.once('SIGINT', function() { bot.stop('SIGINT'); });
