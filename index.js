@@ -397,7 +397,7 @@ bot.command('joke', function(ctx) {
   ctx.reply('😂 Анекдот от 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а:\n\n' + getJoke(), mainKeyboard);
 });
 
- function(ctx) {
+bot.command('random', function(ctx) {
   addStat(ctx.from.id, 'random');
   var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
   ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), mainKeyboard);
@@ -509,6 +509,7 @@ bot.hears('😂 Анекдот', function(ctx) {
 });
 
 
+bot.hears('🎲 Случайное', function(ctx) {
   addStat(ctx.from.id, 'random');
   var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
   ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), mainKeyboard);
