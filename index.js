@@ -1,6 +1,8 @@
 const { Telegraf, Markup } = require('telegraf');
+const https = require('https');
 
 const TOKEN = process.env.TOKEN || process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+const WEATHER_KEY = process.env.WEATHER_KEY || '912198965594f44fe17045d3d783129c';
 const bot = new Telegraf(TOKEN);
 
 // ══════════════════════════════════════
@@ -268,6 +270,7 @@ const mainKeyboard = Markup.keyboard([
   ['♈ Гороскоп', '🎱 Магический шар'],
   ['💘 Любовь', '💼 Работа'],
   ['🌿 Здоровье', '🍀 Удача дня'],
+  ['🌦️ Погода СПб', '😂 Анекдот'],
   ['🎲 Случайное', '📊 Моя статистика'],
   ['🧩 Викторина', '❓ Помощь'],
 ]).resize();
@@ -380,8 +383,21 @@ bot.command('health', function(ctx) {
   ctx.reply('🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(), mainKeyboard);
 });
 
-// Случайное
-bot.command('random', function(ctx) {
+// Погода
+bot.command('weather', function(ctx) {
+  ctx.reply('🌦️ Запрашиваю погоду в Питере...', mainKeyboard);
+  getWeather(function(text) {
+    if (!text) return ctx.reply('😔 Не могу получить погоду. Попробуй позже.', mainKeyboard);
+    ctx.replyWithMarkdown(text, mainKeyboard);
+  });
+});
+
+// Анекдот
+bot.command('joke', function(ctx) {
+  ctx.reply('😂 Анекдот от 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а:\n\n' + getJoke(), mainKeyboard);
+});
+
+ function(ctx) {
   addStat(ctx.from.id, 'random');
   var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
   ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), mainKeyboard);
@@ -480,7 +496,19 @@ bot.hears('🍀 Удача дня', function(ctx) {
   );
 });
 
-bot.hears('🎲 Случайное', function(ctx) {
+bot.hears('🌦️ Погода СПб', function(ctx) {
+  ctx.reply('🌦️ Запрашиваю погоду в Питере...', mainKeyboard);
+  getWeather(function(text) {
+    if (!text) return ctx.reply('😔 Не могу получить погоду. Попробуй позже.', mainKeyboard);
+    ctx.replyWithMarkdown(text, mainKeyboard);
+  });
+});
+
+bot.hears('😂 Анекдот', function(ctx) {
+  ctx.reply('😂 Анекдот от 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а:\n\n' + getJoke(), mainKeyboard);
+});
+
+
   addStat(ctx.from.id, 'random');
   var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
   ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), mainKeyboard);
@@ -527,6 +555,8 @@ bot.hears('❓ Помощь', function(ctx) {
     '💼 Работа — про карьеру и деньги\n' +
     '🌿 Здоровье — про самочувствие\n' +
     '🍀 Удача дня — число, цвет, настроение\n' +
+    '🌦️ Погода СПб — погода в Петербурге\n' +
+    '😂 Анекдот — смешной анекдот\n' +
     '🎲 Случайное — сюрприз!\n' +
     '📊 Статистика — сколько раз спрашивал\n' +
     '🧩 Викторина — проверь знания',
@@ -597,6 +627,113 @@ bot.on('text', function(ctx) {
   addStat(ctx.from.id, 'predict');
   ctx.reply('🔮 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 слышит тебя...\n\n' + getFortune(), mainKeyboard);
 });
+
+// ══════════════════════════════════════
+//  ПОГОДА
+// ══════════════════════════════════════
+
+function getWeather(callback) {
+  var url = 'https://api.openweathermap.org/data/2.5/weather?q=Saint Petersburg,ru&appid=' + WEATHER_KEY + '&units=metric&lang=ru';
+  https.get(url, function(res) {
+    var data = '';
+    res.on('data', function(chunk) { data += chunk; });
+    res.on('end', function() {
+      try {
+        var w = JSON.parse(data);
+        if (w.cod !== 200) { return callback(null); }
+        var desc = w.weather[0].description;
+        desc = desc.charAt(0).toUpperCase() + desc.slice(1);
+        var temp = Math.round(w.main.temp);
+        var feels = Math.round(w.main.feels_like);
+        var humidity = w.main.humidity;
+        var wind = Math.round(w.wind.speed);
+        var pressure = Math.round(w.main.pressure * 0.750062);
+
+        var icon = '🌤️';
+        var id = w.weather[0].id;
+        if (id >= 200 && id < 300) icon = '⛈️';
+        else if (id >= 300 && id < 400) icon = '🌦️';
+        else if (id >= 500 && id < 600) icon = '🌧️';
+        else if (id >= 600 && id < 700) icon = '❄️';
+        else if (id >= 700 && id < 800) icon = '🌫️';
+        else if (id === 800) icon = '☀️';
+        else if (id === 801) icon = '🌤️';
+        else if (id > 801) icon = '☁️';
+
+        var comment = '';
+        if (temp < -15) comment = 'Одевайся как капуста — слой за слоем!';
+        else if (temp < -5) comment = 'Холодно. Даже 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 надел шапку.';
+        else if (temp < 5) comment = 'Питер в своём репертуаре. Шарф обязателен.';
+        else if (temp < 15) comment = 'Типичный Питер. Зонтик не помешает.';
+        else if (temp < 22) comment = 'Отличная погода! По питерским меркам — лето.';
+        else comment = 'Жара! Питерцы в панике — они к этому не готовы.';
+
+        var text =
+          icon + ' *Погода в Санкт-Петербурге:*\n\n' +
+          '🌡️ Температура: *' + temp + '°C*\n' +
+          '🤔 Ощущается как: *' + feels + '°C*\n' +
+          '💧 Влажность: *' + humidity + '%*\n' +
+          '💨 Ветер: *' + wind + ' м/с*\n' +
+          '📊 Давление: *' + pressure + ' мм рт.ст.*\n' +
+          '☁️ ' + desc + '\n\n' +
+          '😄 _' + comment + '_';
+
+        callback(text);
+      } catch(e) {
+        callback(null);
+      }
+    });
+  }).on('error', function() { callback(null); });
+}
+
+// ══════════════════════════════════════
+//  АНЕКДОТЫ
+// ══════════════════════════════════════
+
+const jokes = [
+  "— Доктор, у меня проблемы с памятью!\n— Давно это у вас?\n— Что давно?",
+  "Жена говорит мужу:\n— Ты меня слушаешь вообще?!\n— Да, дорогая, очень красивые серёжки.",
+  "— Мама, почему папа лысый?\n— Потому что много думает, сынок.\n— А почему ты не лысая?\n— Ешь суп.",
+  "Штирлиц вошёл в бар. Бармен спросил:\n— Что будете?\n— Я буду молчать. Это моя работа.",
+  "— Почему ты опоздал на работу?\n— Я шёл пешком.\n— А почему не поехал на машине?\n— Потому что шёл пешком!",
+  "Встречаются два программиста.\n— Как дела?\n— Не трогай, всё работает!",
+  "— Сынок, убери в комнате!\n— Мам, я же занят!\n— Чем?\n— Думаю убираться или нет.",
+  "Муж возвращается домой:\n— Дорогая, я купил то, о чём ты мечтала!\n— Шубу?!\n— Нет, новый процессор. Но мечты сбываются!",
+  "— Почему вы хотите работать у нас?\n— У вас печеньки в переговорной.\n— Вы приняты.",
+  "— Алло, это скорая?\n— Да.\n— Мне плохо.\n— Нам тоже, но мы же работаем.",
+  "Кот смотрит на рыбок в аквариуме.\nРыбки смотрят на кота.\nВсе делают вид, что всё нормально.",
+  "— Дорогой, ты меня любишь?\n— Да.\n— А докажи!\n— Я уже встал с дивана. Это максимум.",
+  "Утро. Будильник звонит в 7:00.\nЯ: нет.\nБудильник: ок.",
+  "— Сколько тебе лет?\n— 29.\n— Уже давно?\n— Пятый год.",
+  "Диетолог: исключите из рациона всё вкусное.\nЯ: то есть мне теперь есть воздух?\nДиетолог: воздух тоже калорийный.",
+  "— Что делаешь?\n— Лежу, думаю о жизни.\n— И что надумал?\n— Что лежать — хорошо.",
+  "Звонок в дверь.\nЯ: кто там?\nМолчание.\nЯ: это моя тревожность, я знаю.",
+  "— Как прошёл день?\n— Как всегда: встал, поработал, лёг. Сурок одобряет.",
+  "Купил книгу «Как перестать откладывать дела на потом».\nПрочитаю потом.",
+  "— Ты изменился.\n— В лучшую сторону?\n— Просто изменился.\n— Принято.",
+  "Психолог: и как давно у вас эта проблема?\nЯ: с детства.\nПсихолог: записывает 'дорогой клиент'.",
+  "— Почему ты такой грустный?\n— Я не грустный, я загадочный.\n— Ты просто не выспался.\n— Это и есть загадка.",
+  "Мотивационный плакат: ты можешь всё!\nЯ: могу я не вставать с дивана?\nПлакат: молчание.",
+  "— Как твоя диета?\n— Отлично! Вчера съел только салат.\n— И?\n— И пиццу. Но сначала салат!",
+  "Кот в 3 ночи: мяу.\nЯ: что?\nКот: мяу.\nЯ: зачем?\nКот: мяу.\nЯ: принято.",
+];
+
+// Пикантные анекдоты (появляются редко — 1 из 6 шансов)
+const spicyJokes = [
+  "— Дорогой, ты думаешь о сексе 24 часа в сутки?\n— Нет, иногда я сплю.",
+  "Муж жене:\n— Дорогая, давай сегодня ляжем спать пораньше?\nЖена: краснеет.\nМуж: я просто устал.",
+  "— Доктор, у меня проблема с потенцией.\n— Давно?\n— С тех пор как жена узнала пароль от телефона.",
+  "— Дорогой, тебе нравится моя новая причёска?\n— Очень! Ты в ней такая... одетая.",
+  "Жена мужу:\n— Ты меня хоть немного хочешь?\nМуж: смотрит на диван, смотрит на жену.\nМуж: немного.",
+];
+
+function getJoke() {
+  // 1 из 6 шансов — пикантный анекдот
+  if (Math.random() < 0.17) {
+    return getRandom(spicyJokes) + '\n\n_😏 Это был пикантный анекдот. Такое бывает редко._';
+  }
+  return getRandom(jokes);
+}
 
 // ══════════════════════════════════════
 //  ЗАПУСК
