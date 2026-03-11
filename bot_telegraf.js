@@ -1,7 +1,7 @@
-const TelegramBot = require('node-telegram-bot-api');
+const { Telegraf, Markup } = require('telegraf');
 
-const TOKEN = '8718231033:AAHBTy632wR7YSq5D8eE1Dh8zqotGrgPRZY';
-const bot = new TelegramBot(TOKEN, { polling: true });
+const TOKEN = process.env.TOKEN || process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+const bot = new Telegraf(TOKEN);
 
 const fortunes = [
   "Сегодня тебя укусит кот соседа. Это хорошая примета — теперь ты официально популярен.",
@@ -55,124 +55,94 @@ function getFortune() {
   return getRandom(fortunes);
 }
 
-const mainKeyboard = {
-  reply_markup: {
-    keyboard: [
-      ['🔮 Предсказание дня', '💘 Про любовь'],
-      ['💼 Про работу', '🌿 Про здоровье'],
-      ['🎲 Случайное', '❓ Помощь'],
-    ],
-    resize_keyboard: true,
-  },
-};
+const keyboard = Markup.keyboard([
+  ['🔮 Предсказание дня', '💘 Про любовь'],
+  ['💼 Про работу', '🌿 Про здоровье'],
+  ['🎲 Случайное', '❓ Помощь'],
+]).resize();
 
-bot.onText(/\/start/, function(msg) {
-  var name = msg.from.first_name || 'смертный';
-  bot.sendMessage(
-    msg.chat.id,
+bot.start(function(ctx) {
+  var name = ctx.from.first_name || 'смертный';
+  ctx.reply(
     '🔮 Приветствую, ' + name + '!\n\nЯ — Великий Оракул Карнавалий.\nОткрою тебе тайны дня... или просто посмеюсь над твоей участью.\n\nВыбери, о чём хочешь узнать 👇',
-    mainKeyboard
+    keyboard
   );
 });
 
-bot.onText(/\/help/, function(msg) {
-  bot.sendMessage(
-    msg.chat.id,
-    '📜 Команды Оракула:\n\n/start — начать заново\n/predict — предсказание дня\n/love — про любовь\n/work — про работу\n/health — про здоровье\n/random — случайное предсказание\n\nИли просто напиши что угодно — Оракул всегда ответит 🔮',
-    mainKeyboard
+bot.help(function(ctx) {
+  ctx.reply(
+    '📜 Команды Оракула:\n\n/start — начать заново\n/predict — предсказание дня\n/love — про любовь\n/work — про работу\n/health — про здоровье\n/random — случайное\n\nИли просто напиши что угодно 🔮',
+    keyboard
   );
 });
 
-bot.onText(/\/predict/, function(msg) {
-  bot.sendMessage(
-    msg.chat.id,
-    '🔮 Великий Оракул вещает:\n\n' + getFortune(),
-    mainKeyboard
-  );
+bot.command('predict', function(ctx) {
+  ctx.reply('🔮 Великий Оракул вещает:\n\n' + getFortune(), keyboard);
 });
 
-bot.onText(/\/love/, function(msg) {
-  bot.sendMessage(
-    msg.chat.id,
-    '💘 О, сердечные дела!\n\n' + getRandom(lovefortunes) + '\n\n' + getFortune(),
-    mainKeyboard
-  );
+bot.command('love', function(ctx) {
+  ctx.reply('💘 О, сердечные дела!\n\n' + getRandom(lovefortunes) + '\n\n' + getFortune(), keyboard);
 });
 
-bot.onText(/\/work/, function(msg) {
-  bot.sendMessage(
-    msg.chat.id,
-    '💼 Вижу твои финансовые тревоги!\n\n' + getRandom(workFortunes) + '\n\n' + getFortune(),
-    mainKeyboard
-  );
+bot.command('work', function(ctx) {
+  ctx.reply('💼 Вижу твои финансовые тревоги!\n\n' + getRandom(workFortunes) + '\n\n' + getFortune(), keyboard);
 });
 
-bot.onText(/\/health/, function(msg) {
-  bot.sendMessage(
-    msg.chat.id,
-    '🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(),
-    mainKeyboard
-  );
+bot.command('health', function(ctx) {
+  ctx.reply('🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(), keyboard);
 });
 
-bot.onText(/\/random/, function(msg) {
+bot.command('random', function(ctx) {
   var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
-  bot.sendMessage(
-    msg.chat.id,
-    '🎲 Случайное предсказание:\n\n' + getRandom(all),
-    mainKeyboard
-  );
+  ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), keyboard);
 });
 
-bot.on('message', function(msg) {
-  if (!msg.text) return;
-  if (msg.text.startsWith('/')) return;
+bot.hears('🔮 Предсказание дня', function(ctx) {
+  ctx.reply('🔮 Великий Оракул вещает:\n\n' + getFortune(), keyboard);
+});
 
-  if (msg.text === '🔮 Предсказание дня') {
-    return bot.sendMessage(msg.chat.id, '🔮 Великий Оракул вещает:\n\n' + getFortune(), mainKeyboard);
-  }
-  if (msg.text === '💘 Про любовь') {
-    return bot.sendMessage(msg.chat.id, '💘 О, сердечные дела!\n\n' + getRandom(lovefortunes) + '\n\n' + getFortune(), mainKeyboard);
-  }
-  if (msg.text === '💼 Про работу') {
-    return bot.sendMessage(msg.chat.id, '💼 Вижу твои финансовые тревоги!\n\n' + getRandom(workFortunes) + '\n\n' + getFortune(), mainKeyboard);
-  }
-  if (msg.text === '🌿 Про здоровье') {
-    return bot.sendMessage(msg.chat.id, '🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(), mainKeyboard);
-  }
-  if (msg.text === '🎲 Случайное') {
-    var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
-    return bot.sendMessage(msg.chat.id, '🎲 Случайное предсказание:\n\n' + getRandom(all), mainKeyboard);
-  }
-  if (msg.text === '❓ Помощь') {
-    return bot.sendMessage(msg.chat.id, '📜 Команды:\n\n/start — начать заново\n/predict — предсказание\n/love — про любовь\n/work — про работу\n/health — про здоровье', mainKeyboard);
-  }
+bot.hears('💘 Про любовь', function(ctx) {
+  ctx.reply('💘 О, сердечные дела!\n\n' + getRandom(lovefortunes) + '\n\n' + getFortune(), keyboard);
+});
 
-  var lower = msg.text.toLowerCase();
+bot.hears('💼 Про работу', function(ctx) {
+  ctx.reply('💼 Вижу твои финансовые тревоги!\n\n' + getRandom(workFortunes) + '\n\n' + getFortune(), keyboard);
+});
+
+bot.hears('🌿 Про здоровье', function(ctx) {
+  ctx.reply('🌿 Здоровье — это богатство!\n\n' + getRandom(healthFortunes) + '\n\n' + getFortune(), keyboard);
+});
+
+bot.hears('🎲 Случайное', function(ctx) {
+  var all = fortunes.concat(lovefortunes).concat(workFortunes).concat(healthFortunes);
+  ctx.reply('🎲 Случайное предсказание:\n\n' + getRandom(all), keyboard);
+});
+
+bot.hears('❓ Помощь', function(ctx) {
+  ctx.reply('📜 Команды:\n\n/start — начать заново\n/predict — предсказание\n/love — про любовь\n/work — про работу\n/health — про здоровье', keyboard);
+});
+
+bot.on('text', function(ctx) {
+  var lower = ctx.message.text.toLowerCase();
 
   if (lower.indexOf('привет') !== -1 || lower.indexOf('hello') !== -1 || lower.indexOf('хай') !== -1) {
-    return bot.sendMessage(msg.chat.id, '✨ Приветствую! Звёзды уже смеются, предвкушая твой день.\n\n' + getFortune(), mainKeyboard);
+    return ctx.reply('✨ Приветствую! Звёзды уже смеются, предвкушая твой день.\n\n' + getFortune(), keyboard);
   }
   if (lower.indexOf('спасибо') !== -1 || lower.indexOf('благодарю') !== -1) {
-    return bot.sendMessage(msg.chat.id, '🙏 Не благодари — благодари звёзды!\nХотя они заняты и, возможно, не заметят.', mainKeyboard);
+    return ctx.reply('🙏 Не благодари — благодари звёзды!\nХотя они заняты и, возможно, не заметят.', keyboard);
   }
   if (lower.indexOf('скучно') !== -1 || lower.indexOf('грустно') !== -1) {
-    return bot.sendMessage(msg.chat.id, '😏 Скуке приходит конец!\n\n' + getFortune() + '\n\nВселенная рекомендует: поговори с кактусом — он выслушает.', mainKeyboard);
+    return ctx.reply('😏 Скуке приходит конец!\n\n' + getFortune() + '\n\nВселенная рекомендует: поговори с кактусом — он выслушает.', keyboard);
   }
 
-  bot.sendMessage(
-    msg.chat.id,
-    '🔮 Оракул слышит тебя...\n\n' + getFortune(),
-    mainKeyboard
-  );
+  ctx.reply('🔮 Оракул слышит тебя...\n\n' + getFortune(), keyboard);
 });
 
-bot.on('polling_error', function(error) {
-  console.log('Ошибка: ' + error.message);
-});
+bot.launch();
 
 console.log('');
-console.log('🔮 Оракул Карнавалий запущен!');
-console.log('   Бот слушает сообщения...');
-console.log('   Нажми Ctrl+C чтобы остановить');
+console.log('🔮 Оракул Карнавалий запущен на Bothost!');
 console.log('');
+
+process.once('SIGINT', function() { bot.stop('SIGINT'); });
+process.once('SIGTERM', function() { bot.stop('SIGTERM'); });
