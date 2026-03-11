@@ -281,7 +281,7 @@ bot.start(function(ctx) {
   addStat(ctx.from.id, 'total');
   ctx.reply(
     '🔮 Приветствую, ' + name + '!\n\n' +
-    'Я — Великий Оракул Карнавалий.\n' +
+    'Я — 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘.\n' +
     'Открою тебе тайны дня... или просто посмеюсь над твоей участью.\n\n' +
     '🔮 Предсказания • 🃏 Карты Таро\n' +
     '♈ Гороскоп • 🎱 Магический шар\n' +
@@ -293,7 +293,7 @@ bot.start(function(ctx) {
 
 bot.help(function(ctx) {
   ctx.reply(
-    '📜 Все команды Оракула:\n\n' +
+    '📜 Все команды 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а:\n\n' +
     '/predict — предсказание дня\n' +
     '/card — карта Таро\n' +
     '/horoscope — гороскоп\n' +
@@ -305,7 +305,7 @@ bot.help(function(ctx) {
     '/quiz — викторина\n' +
     '/stats — моя статистика\n' +
     '/random — случайное\n\n' +
-    'Или просто напиши любой вопрос — Оракул ответит! 🔮',
+    'Или просто напиши любой вопрос — 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 ответит! 🔮',
     mainKeyboard
   );
 });
@@ -313,7 +313,7 @@ bot.help(function(ctx) {
 // Предсказание
 bot.command('predict', function(ctx) {
   addStat(ctx.from.id, 'predict');
-  ctx.reply('🔮 Великий Оракул вещает:\n\n' + getFortune(), mainKeyboard);
+  ctx.reply('🔮 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 вещает:\n\n' + getFortune(), mainKeyboard);
 });
 
 // Карта дня
@@ -391,7 +391,7 @@ bot.command('random', function(ctx) {
 bot.command('stats', function(ctx) {
   var s = stats[ctx.from.id];
   if (!s || s.total === 0) {
-    return ctx.reply('📊 Ты ещё ничего не спрашивал у Оракула!\n\nНачни с /predict 🔮', mainKeyboard);
+    return ctx.reply('📊 Ты ещё ничего не спрашивал у 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а!\n\nНачни с /predict 🔮', mainKeyboard);
   }
   ctx.reply(
     '📊 Твоя статистика:\n\n' +
@@ -403,7 +403,7 @@ bot.command('stats', function(ctx) {
     '🌿 Про здоровье: ' + (s.health || 0) + '\n' +
     '🎲 Случайных: ' + (s.random || 0) + '\n\n' +
     '📈 Всего запросов: ' + s.total + '\n\n' +
-    '_Оракул помнит всё_ 👁️',
+    '_𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 помнит всё_ 👁️',
     { parse_mode: 'Markdown', ...mainKeyboard }
   );
 });
@@ -414,7 +414,7 @@ bot.command('quiz', function(ctx) {
   userQuizState[ctx.from.id] = q;
   var opts = q.options.map(function(o, i) { return (i + 1) + '. ' + o; }).join('\n');
   ctx.reply(
-    '🧩 Вопрос от Оракула:\n\n' +
+    '🧩 Вопрос от 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а:\n\n' +
     q.question + '\n\n' +
     opts + '\n\n' +
     'Ответь цифрой от 1 до ' + q.options.length,
@@ -428,7 +428,7 @@ bot.command('quiz', function(ctx) {
 
 bot.hears('🔮 Предсказание', function(ctx) {
   addStat(ctx.from.id, 'predict');
-  ctx.reply('🔮 Великий Оракул вещает:\n\n' + getFortune(), mainKeyboard);
+  ctx.reply('🔮 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 вещает:\n\n' + getFortune(), mainKeyboard);
 });
 
 bot.hears('🃏 Карта дня', function(ctx) {
@@ -489,7 +489,7 @@ bot.hears('🎲 Случайное', function(ctx) {
 bot.hears('📊 Моя статистика', function(ctx) {
   var s = stats[ctx.from.id];
   if (!s || s.total === 0) {
-    return ctx.reply('📊 Ты ещё ничего не спрашивал у Оракула!\n\nНачни с кнопки 🔮 Предсказание', mainKeyboard);
+    return ctx.reply('📊 Ты ещё ничего не спрашивал у 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а!\n\nНачни с кнопки 🔮 Предсказание', mainKeyboard);
   }
   ctx.reply(
     '📊 Твоя статистика:\n\n' +
@@ -510,7 +510,7 @@ bot.hears('🧩 Викторина', function(ctx) {
   userQuizState[ctx.from.id] = q;
   var opts = q.options.map(function(o, i) { return (i + 1) + '. ' + o; }).join('\n');
   ctx.reply(
-    '🧩 Вопрос от Оракула:\n\n' +
+    '🧩 Вопрос от 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а:\n\n' +
     q.question + '\n\n' + opts + '\n\nОтветь цифрой от 1 до ' + q.options.length,
     mainKeyboard
   );
@@ -518,7 +518,7 @@ bot.hears('🧩 Викторина', function(ctx) {
 
 bot.hears('❓ Помощь', function(ctx) {
   ctx.reply(
-    '📜 Все функции Оракула:\n\n' +
+    '📜 Все функции 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘а:\n\n' +
     '🔮 Предсказание — случайное предсказание\n' +
     '🃏 Карта дня — карта Таро\n' +
     '♈ Гороскоп — напиши свой знак\n' +
@@ -548,7 +548,7 @@ bot.on('text', function(ctx) {
     var answer = parseInt(lower) - 1;
     delete userQuizState[ctx.from.id];
     if (answer === q.correct) {
-      return ctx.reply('✅ Правильно! Оракул впечатлён!\n\n' + q.explanation + '\n\n🎲 Ещё вопрос? Нажми 🧩 Викторина', mainKeyboard);
+      return ctx.reply('✅ Правильно! 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 впечатлён!\n\n' + q.explanation + '\n\n🎲 Ещё вопрос? Нажми 🧩 Викторина', mainKeyboard);
     } else {
       return ctx.reply('❌ Неверно! Правильный ответ: ' + (q.correct + 1) + '. ' + q.options[q.correct] + '\n\n' + q.explanation + '\n\n🎲 Попробуй ещё раз!', mainKeyboard);
     }
@@ -595,7 +595,7 @@ bot.on('text', function(ctx) {
 
   // По умолчанию — предсказание
   addStat(ctx.from.id, 'predict');
-  ctx.reply('🔮 Оракул слышит тебя...\n\n' + getFortune(), mainKeyboard);
+  ctx.reply('🔮 𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 слышит тебя...\n\n' + getFortune(), mainKeyboard);
 });
 
 // ══════════════════════════════════════
@@ -610,7 +610,7 @@ bot.launch();
 
 console.log('');
 console.log('🔮 ══════════════════════════════════');
-console.log('   Оракул Карнавалий МЕГАВЕРСИЯ!');
+console.log('   𝕮𝖔𝖗𝖓𝖊𝖑𝖎𝖚𝖘 МЕГАВЕРСИЯ!');
 console.log('   Предсказания · Таро · Гороскоп');
 console.log('   Магический шар · Викторина · Удача');
 console.log('🔮 ══════════════════════════════════');
