@@ -10,6 +10,28 @@ const bot = new Telegraf(TOKEN);
 // ══════════════════════════════════════
 
 var stats = {};
+var dailyLuck = {}; // кэш удачи дня: userId -> { date, number, color, mood, fortune }
+
+function getTodayDate() {
+  var d = new Date();
+  return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+}
+
+function getDailyLuck(userId) {
+  var today = getTodayDate();
+  if (dailyLuck[userId] && dailyLuck[userId].date === today) {
+    return dailyLuck[userId]; // уже сгенерировано сегодня
+  }
+  // Генерируем новое на сегодня
+  dailyLuck[userId] = {
+    date: today,
+    number: getLuckyNumber(),
+    color: getLuckyColor(),
+    mood: getMood(),
+    fortune: getFortune(),
+  };
+  return dailyLuck[userId];
+}
 
 function addStat(userId, type) {
   if (!stats[userId]) {
@@ -355,13 +377,15 @@ bot.command('ball', function(ctx) {
 
 // Удача дня
 bot.command('lucky', function(ctx) {
-  ctx.reply(
+  var luck = getDailyLuck(ctx.from.id);
+  ctx.replyWithMarkdown(
     '🍀 *Твоя удача на сегодня:*\n\n' +
-    '🔢 Счастливое число: *' + getLuckyNumber() + '*\n' +
-    '🎨 Счастливый цвет: *' + getLuckyColor() + '*\n' +
-    '😊 Настроение дня: *' + getMood() + '*\n\n' +
-    '✨ ' + getFortune(),
-    { parse_mode: 'Markdown', ...mainKeyboard }
+    '🔢 Счастливое число: *' + luck.number + '*\n' +
+    '🎨 Счастливый цвет: *' + luck.color + '*\n' +
+    '😊 Настроение дня: *' + luck.mood + '*\n\n' +
+    '✨ ' + luck.fortune + '\n\n' +
+    '_Удача дня обновляется каждые сутки_ 🌙',
+    mainKeyboard
   );
 });
 
@@ -486,12 +510,14 @@ bot.hears('🌿 Здоровье', function(ctx) {
 });
 
 bot.hears('🍀 Удача дня', function(ctx) {
+  var luck = getDailyLuck(ctx.from.id);
   ctx.replyWithMarkdown(
     '🍀 *Твоя удача на сегодня:*\n\n' +
-    '🔢 Счастливое число: *' + getLuckyNumber() + '*\n' +
-    '🎨 Счастливый цвет: *' + getLuckyColor() + '*\n' +
-    '😊 Настроение дня: *' + getMood() + '*\n\n' +
-    '✨ ' + getFortune(),
+    '🔢 Счастливое число: *' + luck.number + '*\n' +
+    '🎨 Счастливый цвет: *' + luck.color + '*\n' +
+    '😊 Настроение дня: *' + luck.mood + '*\n\n' +
+    '✨ ' + luck.fortune + '\n\n' +
+    '_Удача дня обновляется каждые сутки_ 🌙',
     mainKeyboard
   );
 });
@@ -621,7 +647,8 @@ bot.on('text', function(ctx) {
   }
 
   if (lower.indexOf('удача') !== -1 || lower.indexOf('число') !== -1) {
-    return ctx.replyWithMarkdown('🍀 *Удача дня:*\n\n🔢 Число: *' + getLuckyNumber() + '*\n🎨 Цвет: *' + getLuckyColor() + '*\n\n' + getFortune(), mainKeyboard);
+    var luck = getDailyLuck(ctx.from.id);
+    return ctx.replyWithMarkdown('🍀 *Удача дня:*\n\n🔢 Число: *' + luck.number + '*\n🎨 Цвет: *' + luck.color + '*\n\n' + luck.fortune + '\n\n_Обновляется каждые сутки_ 🌙', mainKeyboard);
   }
 
   // По умолчанию — предсказание
